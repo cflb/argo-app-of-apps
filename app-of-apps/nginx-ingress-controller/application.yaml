@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nginx-ingress
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://kubernetes.github.io/ingress-nginx  # Repositório oficial do NGINX Ingress Controller
+    targetRevision: "*"  # Usando '*' para pegar a versão mais recente disponível
+    chart: ingress-nginx  # Nome do Chart do NGINX Ingress Controller
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ingress-nginx  # O namespace onde o NGINX Ingress será instalado
+  syncPolicy:
+    automated:
+      prune: true  # Remover recursos não utilizados ao sincronizar
+      selfHeal: true  # Reaplicar o estado desejado automaticamente
