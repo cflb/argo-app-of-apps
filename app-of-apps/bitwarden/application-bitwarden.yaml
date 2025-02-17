@@ -1,0 +1,179 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bitwarden
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: 'https://charts.bitwarden.com/'
+    targetRevision: "*"
+    chart: self-host
+    helm:
+      values: |
+        persistence:
+          data:
+            enabled: true
+            size: 10Gi
+          log:
+            enabled: true
+            size: 5Gi
+          backup:
+            enabled: true
+            size: 5Gi
+
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: bitwarden
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+---
+apiVersion: v1
+data:
+  password: bXlwYXNzd29yZA==
+  username: bXl1c2Vy
+kind: Secret
+metadata:
+  name: custom-secret
+  namespace: bitwarden
+type: Opaque
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-bitwarden-self-host-mssqldata
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  hostPath:
+    path: "/mnt/data/mssql-data"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-bitwarden-self-host-mssqllog
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  hostPath:
+    path: "/mnt/data/mssql-log"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-bitwarden-self-host-mssqlbackups
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  hostPath:
+    path: "/mnt/data/mssql-backups"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bitwarden-self-host-mssqldata
+  namespace: bitwarden
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bitwarden-self-host-mssqllog
+  namespace: bitwarden
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bitwarden-self-host-mssqlbackups
+  namespace: bitwarden
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bitwarden-identity-cert
+  namespace: bitwarden
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bitwarden-self-host-dataprotection
+  namespace: bitwarden
+spec:   
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bitwarden-self-host-licenses
+  namespace: bitwarden
+spec:   
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bitwarden-self-host-attachments
+  namespace: bitwarden
+spec:   
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
